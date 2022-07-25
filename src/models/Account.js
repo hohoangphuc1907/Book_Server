@@ -41,9 +41,15 @@ class Account {
                 'type': Number,
                 'required': true,          
             },
-            'favoritebooks': {
-                'type': String,
-                'required': false,          
+            'favoriteBooks': {
+                'type': [{
+                    'idBook': {
+                        'type': Schema.Types.ObjectId,
+                        'required': true,
+                        'ref':'book'
+                    },
+                }],
+                'required': false,
             },
             'password': {
                 'type': String,
@@ -86,15 +92,25 @@ class Account {
                     'idBook': {
                         'type': Schema.Types.ObjectId,
                         'required': true,
+                        'ref':'book'
                     },
                     'time': {
                         'type': String,
-                        'required': true,
+                        'required': false,
                     },
                 }],
+                'required': false,
             },
             'payBook': {
-                'type': String,
+                'type': [
+                    {
+                        'idChapter': {
+                            'type': Schema.Types.ObjectId,
+                            'required': true,
+                            'ref':'chapter'
+                        },
+                    }
+                ],
                 'required': false,
             },
             'timeReadBook':{

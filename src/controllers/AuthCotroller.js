@@ -36,7 +36,7 @@ class AuthCotroller {
                 token_fcm: token_fcm
             }
             const response = await authService.login(body);
-            //console.log("body", response);
+            console.log("body", response);
             await res.status(response.statusCode).json(response);
         }catch(e) {
             console.log('>>>>>>132 login error: ' + e);
@@ -49,7 +49,7 @@ class AuthCotroller {
             const token = this.extractToken(req);
 
             req.account = await this.service.checkLogin(token);
-            console.log("req.account", req.account);
+
             req.authorized = true;
             req.token = token;
             next();
@@ -81,13 +81,77 @@ class AuthCotroller {
     async getreadBooks(req, res, next) {
         try {
             const { id } = req.params;
-            const response = await userService.getreadBook(id);
+            const response = await userService.getCountreadBook(id);
             await res.status(response.statusCode).json(response);
         
         } catch (errors) {
             throw errors;
         }
     }
+    async getFavoriteBooks(req, res, next) {
+        try {
+            const { id } = req.params;
+            const response = await userService.getFavoriteBooks(id);
+            await res.status(response.statusCode).json(response);
+        
+        } catch (errors) {
+            throw errors;
+        }
+    }
+    async getReadingBooks(req, res, next) {
+        try {
+            const { id } = req.params;
+            const response = await userService.getReadingBooks(id);
+            await res.status(response.statusCode).json(response);
+        
+        } catch (errors) {
+            throw errors;
+        }
+    }
+
+    async getPayBook(req, res, next) {
+        try {
+            const { id } = req.params;
+            const response = await userService.getPayBook(id);
+            await res.status(response.statusCode).json(response);
+        } catch (errors) {
+            throw errors;
+        }
+    }
+    
+    async postIdReadingBooks(req, res, next) {
+        try {
+            const { id, idBook } = req.body;
+            const response = await userService.postIdReadingBooks(id,idBook);
+            await res.status(response.statusCode).json(response);
+        
+        } catch (errors) {
+            throw errors;
+        }
+    }
+
+    async postChapterBought(req, res, next) {
+        try {
+            const { idUser, idChapter } = req.body;
+            const response = await userService.postChapterBought(idUser, idChapter);
+            await res.status(response.statusCode).json(response);
+        }catch(e) {
+            next(e);
+        }
+    }
+
+    async  postFavoriteBooks(req, res, next) {
+        try {
+            const { id, idBook } = req.body;
+            const response = await userService.postFavoriteBooks(id,idBook);
+            await res.status(response.statusCode).json(response);
+        
+        } catch (errors) {
+            throw errors;
+        }
+    }
+   
+    
 
     async logout(req, res, next) {
         try {

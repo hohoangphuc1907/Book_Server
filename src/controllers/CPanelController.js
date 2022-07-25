@@ -26,7 +26,7 @@ class CPanelController {
     }
   }
 
-  auth(req, res, next) {
+auth(req, res, next) {
     if (req.cookies && req.cookies.token) {
       console.log(req.cookies.token);
       return;
@@ -83,7 +83,7 @@ class CPanelController {
               expires: new Date(Date.now() + config.COOKIE_TOKEN_LIFETIME),
               httpOnly: true,
             });
-            res.redirect('/cpanel/home');
+            res.redirect('/cpanel/books/allBook');
           }
         });
       }
