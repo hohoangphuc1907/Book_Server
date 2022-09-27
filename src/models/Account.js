@@ -45,6 +45,17 @@ class Account {
                 'type': [{
                     'idBook': {
                         'type': Schema.Types.ObjectId,
+                        'required': false,
+                        'ref':'book'
+                    },
+                }],
+                'required': false,
+            },
+
+            'followBooks': {
+                'type': [{
+                    'idBook': {
+                        'type': Schema.Types.ObjectId,
                         'required': true,
                         'ref':'book'
                     },
@@ -52,6 +63,10 @@ class Account {
                 'required': false,
             },
             'password': {
+                'type': String,
+                'required': false,
+            },
+            'passwordUser': {
                 'type': String,
                 'required': false,
             },
@@ -67,12 +82,21 @@ class Account {
                 'type': String,
                 'required': false,
             },
+            'role':{
+                'type': Number,
+                'required': true,
+                'default': 1
+            },
             'aboutAuthor':{
                 'type': String,
                 'required': false,
             },
             'notification':{
-                'type': String,
+                'type': [{
+                    'type': Schema.Types.ObjectId,
+                    'required': false,
+                    'ref':'notification'
+                }],
                 'required': false,
             },
             'bookmark':{
@@ -100,6 +124,11 @@ class Account {
                     },
                 }],
                 'required': false,
+            },
+            'authorAcess':{
+                'type': Number,
+                'required': false,
+                default: 1
             },
             'payBook': {
                 'type': [

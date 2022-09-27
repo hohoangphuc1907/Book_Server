@@ -6,6 +6,7 @@ const { Account } = require('./../models/Account');
 const authService = new AuthService(new Auth().getInstance(), new Account().getInstance());
 const userService = new UserService(new Account().getInstance());
 const autoBind = require('auto-bind');
+const bcrypt=require('bcryptjs');
 const { OAuth2Client } = require("google-auth-library"),
   client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 class AuthCotroller {
@@ -25,7 +26,7 @@ class AuthCotroller {
             const check_email = config.EMAIL_GOOGLE_TESTING;
             const body = {
                 email: email,
-                //role: config.USER_ROLE.EMPLOYEE,
+                role: config.USER_ROLE.USER,
                 name: name,
                 image: picture,
                 phone: " ",
@@ -36,24 +37,9 @@ class AuthCotroller {
                 token_fcm: token_fcm
             }
             const response = await authService.login(body);
-            console.log("body", response);
             await res.status(response.statusCode).json(response);
         }catch(e) {
             console.log('>>>>>>132 login error: ' + e);
-            next(e);
-        }
-    }
-
-    async checkLogin(req, res, next) {
-        try {
-            const token = this.extractToken(req);
-
-            req.account = await this.service.checkLogin(token);
-
-            req.authorized = true;
-            req.token = token;
-            next();
-        } catch (e) {
             next(e);
         }
     }
@@ -64,6 +50,15 @@ class AuthCotroller {
             const response = await userService.getAll({limit:1000});
             const data = response.data.filter(x => x.permission === 'author');
             res.status(response.statusCode).json(data);
+        } catch (e) {
+            // next(e);
+        }
+    }
+    async getDetailAuthor(req, res, next) {
+        try {
+            const {id}=req.params;
+            const response = await userService.get(id);
+            res.status(response.statusCode).json(response);
         } catch (e) {
             // next(e);
         }
@@ -98,12 +93,12 @@ class AuthCotroller {
             throw errors;
         }
     }
+
     async getReadingBooks(req, res, next) {
         try {
             const { id } = req.params;
             const response = await userService.getReadingBooks(id);
             await res.status(response.statusCode).json(response);
-        
         } catch (errors) {
             throw errors;
         }
@@ -140,18 +135,25 @@ class AuthCotroller {
         }
     }
 
-    async  postFavoriteBooks(req, res, next) {
+    async postFavoriteBooks(req, res, next) {
         try {
             const { id, idBook } = req.body;
             const response = await userService.postFavoriteBooks(id,idBook);
             await res.status(response.statusCode).json(response);
-        
-        } catch (errors) {
-            throw errors;
+        } catch (e) {
+            next(e);
         }
     }
    
-    
+    async postFollowBooks(req, res, next) {
+        try {
+            const { id, idBook } = req.body;
+            const response = await userService.postFollowBooks(id,idBook);
+            await res.status(response.statusCode).json(response);
+        } catch (e) {
+            next(e);
+        }
+    }
 
     async logout(req, res, next) {
         try {
@@ -162,6 +164,19 @@ class AuthCotroller {
             await res.status(response.statusCode).json(response);
         } catch (e) {
             next(e);
+        }
+    }
+
+    async checkLogin( req, res, next ) {
+        try {
+            const token = this.extractToken( req );
+            const response = await this.service.checkLogin( token );
+            req.account = response;
+            req.authorized = true;
+            req.token = token;
+            next();
+        } catch ( e ) {
+            next( e );
         }
     }
 
@@ -176,15 +191,81 @@ class AuthCotroller {
         return null;
     }
 
-    test(req, res, next) {
+    async indexUser_Cpanel(req, res, next) {
         try {
-            // const response = await this.service.login( req.body.email, req.body.password );
-
-            res.render('auth/login');
+            const { id }= req.params;
+            if( id==1 ){
+                const response = await userService.getAll({limit:1000});
+            
+                res.render("user/index",{data:response.data,idData:JSON.stringify(id)});
+            }else if( id==2 ){
+                const response = await userService.findauthorAcess(id);
+                
+                res.render("user/indexAccess",{data:response.data,idData:JSON.stringify(id)});
+            }
+       
         } catch (e) {
-            console.log(e);
+          console.log(e);
         }
-    }
+      }
+      async agreeAccess(req, res, next) {
+        try {
+               const { idUser } = req.body; 
+               const response = await userService.agreeAccess(idUser);           
+               return res.status(response.statusCode).json(response);
+           
+       
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      async AccessAuthor(req, res, next) {
+        try {
+               const { _id } = req.account;     
+               const response = await userService.AccessAuthor(_id);           
+               return res.status(response.statusCode).json(response);
+           
+       
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      async refuseAccess(req, res, next) {
+        try {
+               const { idUser } = req.body;       
+               const response = await userService.refuseAccess(idUser);           
+               return res.status(response.statusCode).json(response);
+           
+       
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      async insertNumberphone(req, res, next) {
+        try {
+               const { body } = req;     
+               const response = await userService.insertNumberphone(body);           
+               return res.status(response.statusCode).json(response);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      async loginNumberphone(req, res, next) {
+        try {
+               const { body } = req;  
+               const { passwordUser } = req.body;   
+               const response = await authService.loginNumberphone(body);  
+               const checkPassword=await bcrypt.compare(passwordUser, response.data.account.passwordUser);
+               if(checkPassword){
+                return res.status(response.statusCode).json(response);
+               }
+              
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      
 }
 
 module.exports = new AuthCotroller(authService);

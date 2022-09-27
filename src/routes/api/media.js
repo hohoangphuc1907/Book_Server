@@ -16,18 +16,28 @@ cloudinary.config({
 const cloudinaryUpload = (file) => cloudinary.uploader.upload(file);
 var router = express.Router();
 const storage = multer.memoryStorage();
-const upload = multer({
-  storage,
-});
-const singleUpload = upload.single("image");
 
-router.post("/uploadImage", singleUpload, async (req, res) => {
+const upload = multer({
+  'storage': storage,
+  // 'storage': multer.memoryStorage(),
+  'limits': {
+      'fileSize': 1080 * 1920 * 5
+  },
+  fileFilter: function (req, file, callback) {
+      const allowedExtensions = new RegExp(/.(jpg|png|jpeg|gif)$/gi);
+      if (!allowedExtensions.test(file.originalname)) return callback(null, false);
+      return callback(null, true);
+  }
+});
+const singleUpload = upload.single("file");
+
+router.post("/uploadImage", [singleUpload], async (req, res) => {
   try {
+    
     if (!req.file) {
       throw new Error("Image is not presented!");
     }
     const file64 = formatBufferTo64(req.file);
-    
     const uploadResult = await cloudinaryUpload(file64.content);
 
     return res.json({
