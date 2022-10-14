@@ -7,6 +7,7 @@ const authService = new AuthService(new Auth().getInstance(), new Account().getI
 const userService = new UserService(new Account().getInstance());
 const autoBind = require('auto-bind');
 const bcrypt=require('bcryptjs');
+const { MediaService } = require('../services/MediaService');
 const { OAuth2Client } = require("google-auth-library"),
   client = new OAuth2Client(config.GOOGLE_CLIENT_ID);
 class AuthCotroller {
@@ -67,6 +68,27 @@ class AuthCotroller {
         try {
             const { id } = req.params;
             const response = await userService.getTimeRead(id);
+            await res.status(response.statusCode).json(response);
+        } catch (e) {
+            // next(e);
+        }
+    }
+
+    async changeReadTimeBook(req, res, next) {
+        try {
+            const idUser=req.account._id;
+            const { body } = req;
+            const response = await userService.changeReadTimeBook(idUser,body);
+            await res.status(response.statusCode).json(response);
+        } catch (e) {
+            // next(e);
+        }
+    }
+
+    async getReadTimeBook(req, res, next) {
+        try {
+            const { id } = req.params;
+            const response = await userService.getReadTimeBook(id);
             await res.status(response.statusCode).json(response);
         } catch (e) {
             // next(e);
@@ -260,6 +282,50 @@ class AuthCotroller {
                 return res.status(response.statusCode).json(response);
                }
               
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      async getpurchaseCart(req, res, next) {
+        try {  
+               const idUser=req.account._id;
+               const response = await userService.getpurchaseCart(idUser);  
+               await res.status(response.statusCode).json(response);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      async getChangeProfile(req, res, next) {
+        try {  
+               const idUser=req.account._id;
+               const {name}=req.body;
+               
+               const urlImage= await userService.createImage(req.file);
+               const data = {
+                    image:urlImage.data.url,
+                    name,
+               }
+               const response = await userService.getChangeProfile(idUser,data);  
+               await res.status(response.statusCode).json(response);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+
+      async creatAudio(req, res, next) {
+        try {  
+               const idUser=req.account._id;
+               const {name}=req.body;
+               
+               const urlImage= await userService.createAudio(req.file);
+              
+               const data = {
+                    image:urlImage.data.url,
+                    name,
+               }
+               const response = await userService.getChangeProfile(idUser,data);  
+               await res.status(response.statusCode).json(response);
         } catch (e) {
           console.log(e);
         }
