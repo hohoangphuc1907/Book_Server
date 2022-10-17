@@ -118,7 +118,6 @@ class UserService extends Service{
                 throw error;
             }
          
-            console.log(book);
             return new HttpResponse( book);
         } catch (errors) {
             throw errors;
@@ -283,7 +282,6 @@ class UserService extends Service{
             const check = await this.model.find({'historyBookRead.idBook':idBook});
             if (check.length === 0) {
                 const book = await this.model.findByIdAndUpdate(id, {$push: {historyBookRead: {idBook}}});
-                console.log(book);
                 return new HttpResponse( book);
             }
             return new HttpResponse("FF");
@@ -515,13 +513,18 @@ class UserService extends Service{
 
     async getpurchaseCart(idUser){
         try {
-          
-            const item = await this.model.find({'_id':idUser})
+            const item = await this.model.find({'_id':idUser},{purchaseHistory: 1})
             .populate({
                 path: 'purchaseHistory',
                 populate: {
                     path: 'idCart',
-                }   
+                    populate: {
+                        path: 'idChapter',
+                        populate: {
+                            path: 'idBook',
+                        }
+                    }
+                },    
             });
             if (item) {
                 return new HttpResponse(item);
